@@ -35,6 +35,10 @@ export const GET = async (request: Request) => {
   const errors: Failed[] = [];
   const skipped: string[] = [];
 
+  // Taken before reading notifications: a mention indexed while this run is
+  // fetching must stay unread for the next run, not be marked seen unhandled.
+  const seenAt = new Date().toISOString();
+
   const { count } = await getUnreadNotificationsCount();
 
   if (count === 0) {
@@ -52,7 +56,6 @@ export const GET = async (request: Request) => {
   console.info(`Found ${notifications.length} new mentions`);
 
   const { did } = await getAgent();
-  const seenAt = new Date().toISOString();
 
   for (const notification of notifications) {
     try {
